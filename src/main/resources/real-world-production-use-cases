@@ -1,0 +1,11 @@
+
+1.Secure service-to-service communication using authentication headers.
+2.Distributed tracing using correlation IDs across microservices.
+3.Centralized error handling using custom ErrorDecoder implementations.
+4.Debugging API calls using Feign logging.
+5.Handling slow or unreliable services with timeouts and retries.
+6.Integrating with third-party APIs(payment, shipping, external services).
+7.Supporting non-standard API formats using custom encoders and decoders.
+8.Configuring different behavior per microservice(timeouts, logging, error handling).
+9.Simplifying internal microservices communication.
+10.Improving system resilience with retry and circuit breaker patterns.
