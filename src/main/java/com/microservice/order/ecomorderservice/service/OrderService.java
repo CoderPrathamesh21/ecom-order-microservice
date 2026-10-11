@@ -18,11 +18,13 @@ public class OrderService {
     private final RestTemplate restTemplate;
     private final RestClient restClient;
     private final InventoryClient inventoryClient;
+    private final InventoryService inventoryService;
 
-    public OrderService(RestTemplate restTemplateConfig, RestClient restClient, InventoryClient inventoryClient) {
+    public OrderService(RestTemplate restTemplateConfig, RestClient restClient, InventoryClient inventoryClient, InventoryService inventoryService) {
         this.restTemplate = restTemplateConfig;
         this.restClient = restClient;
         this.inventoryClient = inventoryClient;
+        this.inventoryService = inventoryService;
     }
 
     public String placeOrder(Long productId) {
@@ -47,7 +49,11 @@ public class OrderService {
                 .toEntity(Inventory.class);*/
 
         //FeignClient
-        Inventory inventory = inventoryClient.getInventory(productId);
+        /*Inventory inventory = inventoryClient.getInventory(productId);
+        Integer quantity = inventory.getQuantity();
+        updateInventory(inventory);*/
+
+        Inventory inventory = inventoryService.getInventory(productId);
         Integer quantity = inventory.getQuantity();
         updateInventory(inventory);
 
