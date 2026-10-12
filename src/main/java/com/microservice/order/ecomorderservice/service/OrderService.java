@@ -53,7 +53,7 @@ public class OrderService {
         Integer quantity = inventory.getQuantity();
         updateInventory(inventory);*/
 
-        Inventory inventory = inventoryService.getInventory(productId);
+        Inventory inventory = inventoryService.getInventory(productId).join();
         Integer quantity = inventory.getQuantity();
         updateInventory(inventory);
 
