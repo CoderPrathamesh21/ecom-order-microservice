@@ -62,6 +62,10 @@ public class OrderService {
     }
 
     private void updateInventory(Inventory inventory) {
+
+        if (inventory.getQuantity() <= 0) {
+            return;
+        }
         inventory.setQuantity(inventory.getQuantity() - 1);
         inventoryClient.updateInventory(inventory);
 

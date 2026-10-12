@@ -2,6 +2,7 @@ package com.microservice.order.ecomorderservice.service;
 
 import com.microservice.order.ecomorderservice.client.InventoryClient;
 import com.microservice.order.ecomorderservice.dto.Inventory;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import org.springframework.retry.annotation.Backoff;
@@ -18,10 +19,12 @@ public class InventoryService {
     }
 
     /*@Retryable(retryFor = RuntimeException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
-    @RateLimiter(name = "inventoryService", fallbackMethod = "fallbackMethod")*/
-    @CircuitBreaker(name = "inventoryServiceCircuitBreaker", fallbackMethod = "circuitBreakerFallbackMethod")
+    @RateLimiter(name = "inventoryService", fallbackMethod = "fallbackMethod")
+    @CircuitBreaker(name = "inventoryServiceCircuitBreaker", fallbackMethod = "circuitBreakerFallbackMethod")*/
+    @Bulkhead(name = "inventoryServiceBulkhead", fallbackMethod = "bulkHeadFallbackMethod")
     public Inventory getInventory(Long productId) {
-        System.out.println("Calling Inventory Service for productId: " + productId);
+        System.out.println("Calling Inventory Service for productId: " + productId
+        + " | in thread: " + Thread.currentThread().getName());
         return inventoryClient.getInventory(productId);
     }
 
@@ -31,8 +34,15 @@ public class InventoryService {
         return new Inventory(productId, 0); // Assuming 0 quantity as a fallback
     }*/
 
-    public Inventory circuitBreakerFallbackMethod(Long productId, Throwable throwable) {
+    /*public Inventory circuitBreakerFallbackMethod(Long productId, Throwable throwable) {
         System.out.println("Fallback method called for productId: " + productId + " due to: " + throwable.getMessage());
+        // Return a default Inventory object or handle the fallback logic as needed
+        return new Inventory(productId, 0); // Assuming 0 quantity as a fallback
+    }*/
+
+    public Inventory bulkHeadFallbackMethod(Long productId, Throwable throwable) {
+        System.out.println("Bulkhead rejected request for productId: " + productId +
+                " | due to: " + throwable.getClass().getSimpleName());
         // Return a default Inventory object or handle the fallback logic as needed
         return new Inventory(productId, 0); // Assuming 0 quantity as a fallback
     }
