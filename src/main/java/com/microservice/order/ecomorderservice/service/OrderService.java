@@ -12,6 +12,8 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.concurrent.ExecutionException;
+
 @Service
 public class OrderService {
 
@@ -27,7 +29,7 @@ public class OrderService {
         this.inventoryService = inventoryService;
     }
 
-    public String placeOrder(Long productId) {
+    public String placeOrder(Long productId) throws ExecutionException, InterruptedException {
 
         //RestTemplate
         //String inventoryStatus = restTemplate.getForObject("http://localhost:8067/api/v1/inventory/" + productId, String.class);
@@ -53,7 +55,7 @@ public class OrderService {
         Integer quantity = inventory.getQuantity();
         updateInventory(inventory);*/
 
-        Inventory inventory = inventoryService.getInventory(productId);
+        Inventory inventory = inventoryService.getInventory(productId).get();
         Integer quantity = inventory.getQuantity();
         updateInventory(inventory);
 

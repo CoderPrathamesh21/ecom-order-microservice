@@ -9,6 +9,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CompletableFuture;
+
 @Service
 public class InventoryService {
 
@@ -21,11 +23,12 @@ public class InventoryService {
     /*@Retryable(retryFor = RuntimeException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
     @RateLimiter(name = "inventoryService", fallbackMethod = "fallbackMethod")
     @CircuitBreaker(name = "inventoryServiceCircuitBreaker", fallbackMethod = "circuitBreakerFallbackMethod")*/
-    @Bulkhead(name = "inventoryServiceBulkhead", fallbackMethod = "bulkHeadFallbackMethod")
-    public Inventory getInventory(Long productId) {
+    @Bulkhead(name = "inventoryServiceThreadPool", type = Bulkhead.Type.THREADPOOL,
+            fallbackMethod = "bulkHeadFallbackMethod")
+    public CompletableFuture<Inventory> getInventory(Long productId) {
         System.out.println("Calling Inventory Service for productId: " + productId
         + " | in thread: " + Thread.currentThread().getName());
-        return inventoryClient.getInventory(productId);
+        return CompletableFuture.completedFuture(inventoryClient.getInventory(productId));
     }
 
     /*public Inventory fallbackMethod(Long productId, Throwable throwable) {
@@ -40,11 +43,11 @@ public class InventoryService {
         return new Inventory(productId, 0); // Assuming 0 quantity as a fallback
     }*/
 
-    public Inventory bulkHeadFallbackMethod(Long productId, Throwable throwable) {
+    public CompletableFuture<Inventory> bulkHeadFallbackMethod(Long productId, Throwable throwable) {
         System.out.println("Bulkhead rejected request for productId: " + productId +
                 " | due to: " + throwable.getClass().getSimpleName());
         // Return a default Inventory object or handle the fallback logic as needed
-        return new Inventory(productId, 0); // Assuming 0 quantity as a fallback
+        return CompletableFuture.completedFuture(new Inventory(productId, 0)); // Assuming 0 quantity as a fallback
     }
 
 }
